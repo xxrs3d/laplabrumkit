@@ -91,6 +91,14 @@
     <h2>LAPORAN LAB RUMKIT</h2>
 
     <div class="form-card">
+        <label>Waktu Laporan (Salam)</label>
+        <select id="salam-opt" onchange="generate()">
+            <option value="auto">Otomatis (Sesuai Waktu)</option>
+            <option value="Selamat Pagi">Selamat Pagi</option>
+            <option value="Selamat Siang">Selamat Siang</option>
+            <option value="Selamat Malam">Selamat Malam</option>
+        </select>
+
         <label>Tanggal & Waktu</label>
         <input type="date" id="tgl" onchange="generate()">
         
@@ -193,10 +201,25 @@
     }
 
     function getLaporan() {
-        var hr = new Date().getHours();
-        var salam = (hr >= 6 && hr < 12) ? "Selamat Pagi" : (hr >= 12 && hr < 18) ? "Selamat Sore" : "Selamat Malam";
-        var tglStr = getTanggalStr();
+        // Ambil pilihan salam dari dropdown
+        var salamOpt = document.getElementById('salam-opt').value;
+        var salam = "";
 
+        if (salamOpt === "auto") {
+            var hr = new Date().getHours();
+            if (hr >= 6 && hr < 12) {
+                salam = "Selamat Pagi";
+            } else if (hr >= 12 && hr < 16) {
+                salam = "Selamat Siang";
+            } else {
+                // Mencakup jam 16.00 hingga 05.59 pagi
+                salam = "Selamat Malam";
+            }
+        } else {
+            salam = salamOpt; // Ambil nilai manual (Pagi/Siang/Malam)
+        }
+
+        var tglStr = getTanggalStr();
         var total = 0;
         Object.keys(counts).forEach(function(k) { total += counts[k]; });
 
