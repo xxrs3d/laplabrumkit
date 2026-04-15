@@ -194,7 +194,7 @@
 
     function getLaporan() {
         var hr = new Date().getHours();
-        var salam = (hr >= 6 && hr < 15) ? "Selamat Pagi" : (hr >= 15 && hr < 18) ? "Selamat Sore" : "Selamat Malam";
+        var salam = (hr >= 6 && hr < 12) ? "Selamat Pagi" : (hr >= 12 && hr < 18) ? "Selamat Sore" : "Selamat Malam";
         var tglStr = getTanggalStr();
 
         var total = 0;
