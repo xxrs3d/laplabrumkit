@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lab Report Generator</title>
+    <style>
+        :root { --army: #2e4d2e; --success: #25d366; --bg: #f0f2f5; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        
+        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h2 { text-align: center; color: var(--army); font-size: 1rem; margin-top: 0; border-bottom: 2px solid var(--army); padding-bottom: 10px; }
+        
+        .form-card { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e9ecef; }
+        label { display: block; font-weight: bold; font-size: 0.75rem; margin-bottom: 5px; color: #666; text-transform: uppercase; }
+        
+        select, input[type="date"] { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; font-size: 16px; margin-bottom: 10px; background: white; -webkit-appearance: none; appearance: none; }
+        
+        .patient-card { border: 1px solid #eee; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; }
+        .kat-title { font-weight: bold; color: var(--army); margin-bottom: 8px; font-size: 0.9rem; }
+        
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .btn-group { display: flex; align-items: center; gap: 15px; }
+        
+        button.math { width: 44px; height: 44px; border: none; background: var(--army); color: white; border-radius: 8px; font-size: 22px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-appearance: none; touch-action: manipulation; }
+        button.math:active { opacity: 0.7; }
+        .val { font-weight: bold; min-width: 25px; text-align: center; font-size: 18px; }
+
+        #preview { 
+            width: 100%; 
+            min-height: 350px;
+            background: #075e54; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-family: "Courier New", Courier, monospace; 
+            font-size: 12px; 
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-x: hidden;
+            border: 2px solid #128c7e;
+            margin-top: 10px; 
+            -webkit-user-select: all; 
+            -moz-user-select: all;
+            user-select: all;
+        }
+
+        .btn-wrap { display: flex; gap: 10px; margin-top: 15px; }
+
+        .btn-copy, .btn-wa { 
+            flex: 1;
+            padding: 18px 8px; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 15px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            -webkit-appearance: none;
+            touch-action: manipulation;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-copy { background: #1a73e8; }
+        .btn-wa { background: var(--success); }
+        .btn-copy:active { background: #1558b0; }
+        .btn-wa:active { background: #128c7e; }
+
+        .toast { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; 
+            border-radius: 20px; font-size: 14px; display: none; z-index: 100; 
+            white-space: nowrap;
+        }
+
+        .info-box {
+            background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;
+            padding: 10px 12px; font-size: 12px; color: #856404; margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>LAPORAN LAB RUMKIT</h2>
+
+    <div class="form-card">
+        <label>Tanggal & Waktu</label>
+        <input type="date" id="tgl" onchange="generate()">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+                <label>Dinas Saat Ini</label>
+                <select id="s1" onchange="generate()">
+                    <option>Dinas Siang</option><option>Dinas Pagi</option><option>Dinas Malam</option>
+                </select>
+                <select id="n1" onchange="generate()">
+                    <option>Koptu Adel</option><option>Sukwan Aris</option><option>Sukwan Lioni</option><option>P3K Monica</option>
+                </select>
+            </div>
+            <div>
+                <label>Dinas Sebelumnya</label>
+                <select id="s2" onchange="generate()">
+                    <option>Dinas Pagi</option><option>Dinas Siang</option><option>Dinas Malam</option>
+                </select>
+                <select id="n2" onchange="generate()">
+                    <option>Sukwan Aris</option><option>Sukwan Lioni</option><option>P3K Monica</option><option>Koptu Adel</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="input-area"></div>
+
+    <label>Klik di bawah untuk Auto-Select:</label>
+    <div id="preview" onclick="selectText(this)"></div>
+    <div id="info-box" class="info-box">
+        Jika tombol Salin tidak bekerja, ketuk teks hijau di atas → tahan → Pilih Semua → Salin
+    </div>
+
+    <div class="btn-wrap">
+        <button class="btn-copy" onclick="copyToClipboard()">&#128203; SALIN</button>
+        <button class="btn-wa" onclick="kirimWA()">&#128232; KIRIM WA</button>
+    </div>
+</div>
+
+<div id="toast" class="toast">Laporan tersalin!</div>
+
+<script>
+    var kats = [
+        { id: 'mil', n: 'Militer' },
+        { id: 'pns', n: 'PNS' },
+        { id: 'kbt', n: 'KBT' },
+        { id: 'umu', n: 'Masyarakat umum' }
+    ];
+
+    var counts = {};
+    kats.forEach(function(k) { counts[k.id+'_b']=0; counts[k.id+'_u']=0; });
+
+    // Safari-safe date: set today without timezone shift
+    (function() {
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = String(now.getMonth()+1).padStart(2,'0');
+        var d = String(now.getDate()).padStart(2,'0');
+        document.getElementById('tgl').value = y+'-'+m+'-'+d;
+    })();
+
+    function init() {
+        var area = document.getElementById('input-area');
+        kats.forEach(function(k) {
+            var div = document.createElement('div');
+            div.className = 'patient-card';
+            div.innerHTML = 
+                '<span class="kat-title">'+k.n+'</span>'+
+                '<div class="row"><span>BPJS</span><div class="btn-group">'+
+                '<button class="math" onclick="set(\''+k.id+'_b\',-1)">&#8722;</button>'+
+                '<span class="val" id="'+k.id+'_b_v">0</span>'+
+                '<button class="math" onclick="set(\''+k.id+'_b\',1)">+</button>'+
+                '</div></div>'+
+                '<div class="row"><span>Umum</span><div class="btn-group">'+
+                '<button class="math" onclick="set(\''+k.id+'_u\',-1)">&#8722;</button>'+
+                '<span class="val" id="'+k.id+'_u_v">0</span>'+
+                '<button class="math" onclick="set(\''+k.id+'_u\',1)">+</button>'+
+                '</div></div>';
+            area.appendChild(div);
+        });
+        generate();
+    }
+
+    function set(id, v) {
+        counts[id] = Math.max(0, counts[id] + v);
+        document.getElementById(id+'_v').innerText = counts[id];
+        generate();
+    }
+
+    function getTanggalStr() {
+        // Safari-safe: parse date string manually to avoid UTC offset issue
+        var val = document.getElementById('tgl').value; // "YYYY-MM-DD"
+        var parts = val.split('-');
+        if (parts.length !== 3) return '';
+        var y = parseInt(parts[0]), m = parseInt(parts[1])-1, d = parseInt(parts[2]);
+        var hari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+        var bln = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+        var date = new Date(y, m, d);
+        return hari[date.getDay()] + ', ' + d + ' ' + bln[m] + ' ' + y;
+    }
+
+    function getLaporan() {
+        var hr = new Date().getHours();
+        var salam = (hr >= 6 && hr < 15) ? "Selamat Pagi" : (hr >= 15 && hr < 18) ? "Selamat Sore" : "Selamat Malam";
+        var tglStr = getTanggalStr();
+
+        var total = 0;
+        Object.keys(counts).forEach(function(k) { total += counts[k]; });
+
+        var txt = salam+'\nIjin melaporkan serah terima Dinas Laboratorium Rumkit TNI AD\n*'+tglStr+'*\nSebagai berikut :\n\n';
+        txt += '*'+document.getElementById('s1').value+'*\n  '+document.getElementById('n1').value+'\n\n';
+        txt += '*'+document.getElementById('s2').value+'*\n  '+document.getElementById('n2').value+'\n\n';
+        txt += 'Jumlah pasien : '+total+' Orang\nKeterangan :\n\n';
+        txt += 'Lab Rutin     : '+total+' Orang\nKet           :\n';
+
+        kats.forEach(function(k, i) {
+            var b = counts[k.id+'_b'];
+            var u = counts[k.id+'_u'];
+            var label = k.n;
+            while (label.length < 16) label += ' ';
+            if (b === 0 && u === 0) {
+                txt += (i+1)+'. '+label+' : nihil\n';
+            } else {
+                txt += (i+1)+'. '+label+' :\n';
+                if (b > 0) txt += '      - BPJS        : '+b+' Orang\n';
+                if (u > 0) txt += '      - Umum        : '+u+' Orang\n';
+            }
+        });
+
+        txt += '\nRumkit TNI-AD dalam keaadan aman, Laporan Selesai.';
+        return txt;
+    }
+
+    function generate() {
+        document.getElementById('preview').innerText = getLaporan();
+    }
+
+    function selectText(node) {
+        try {
+            var range = document.createRange();
+            range.selectNodeContents(node);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } catch(e) {}
+    }
+
+    function copyToClipboard() {
+        var text = getLaporan();
+        
+        // Try modern clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Tersalin! Buka WhatsApp dan tempel.');
+            }).catch(function() {
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function fallbackCopy(text) {
+        // Safari-compatible fallback using textarea + execCommand
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.setSelectionRange(0, text.length);
+        var ok = false;
+        try {
+            ok = document.execCommand('copy');
+        } catch(e) {}
+        document.body.removeChild(ta);
+        
+        if (ok) {
+            showToast('Tersalin! Buka WhatsApp dan tempel.');
+        } else {
+            // Show manual instruction
+            document.getElementById('info-box').style.display = 'block';
+            // Try to select the preview text so user can copy manually
+            selectText(document.getElementById('preview'));
+            showToast('Ketuk teks hijau → tahan → Salin');
+        }
+    }
+
+    function kirimWA() {
+        var text = getLaporan();
+        // Remove markdown bold (*text*) for plain WA link
+        var encoded = encodeURIComponent(text);
+        // Try whatsapp:// deep link first (opens WA app on iPhone)
+        var waUrl = 'whatsapp://send?text=' + encoded;
+        window.location.href = waUrl;
+        
+        // Fallback to web.whatsapp.com after short delay if app not installed
+        setTimeout(function() {
+            // If still on page, open web version
+            var webUrl = 'https://wa.me/?text=' + encoded;
+            window.open(webUrl, '_blank');
+        }, 1500);
+    }
+
+    function showToast(msg) {
+        var t = document.getElementById('toast');
+        t.innerText = msg || 'Tersalin!';
+        t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 3000);
+    }
+
+    init();
+</script>
+</body>
+</html>
